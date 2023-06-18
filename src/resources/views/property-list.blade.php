@@ -88,67 +88,61 @@
 
     <!-- Page Content -->
     <div id="content">
-      <div class="MainPage">Welcome</div>
-      <img class="MainPage" src="{{ asset('img/house.jpg') }}" height="15%" width="100%">
-
-
-      <div class="MainPageText">Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Proin in tellus sit amet nibh dignissim sagittis. Proin pede metus, vulputate nec, fermentum fringilla
-        , vehicula vitae, justo. Et harum quidem rerum facilis est et expedita distinctio. Donec quis nibh at felis congue commodo. Nulla accumsan, elit sit amet varius semper, nulla mauris mol
-        lis quam, tempor suscipit diam nulla vel leo. Proin pede metus, vulputate nec, fermentum fringilla, vehicula vitae, justo. Sed ac dolor sit amet purus malesuada congue. Etiam posuere lac
-        us quis dolor. Aliquam erat volutpat.
-      </div>
-
-      <div class="circle-container">
-        <!-- Apartment -->
-        <div class="circle">
-          <h3>{{ $numberOfApartments }}</h3>
-          <p>Apartments</p>
-          <div class="sub-circles">
-            <div class="sub-circle">
-              <h4>{{ $numberOfApartmentsForRent }}</h4>
-              <p>For Rent</p>
+      <div class="container-fluid">
+        <div class="row justify-content-center">
+          <div class="col-12">
+            <h1>Properties</h1>
+            <a href="{{ route('property.create') }}" class="btn btn-primary mb-3">Add New Property</a>
+            @if($properties->isEmpty())
+            <p>No properties found for this user.</p>
+            @else
+            <div class="table-responsive">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>Description</th>
+                    <th>Type</th>
+                    <th>Rent/Sale</th>
+                    <th>Size</th>
+                    <th>Price</th>
+                    <th>Address</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @foreach($properties as $property)
+                  <tr>
+                    <td>{{ $property->description }}</td>
+                    <td>
+                      @switch($property->property_type)
+                      @case(1) Apartment @break
+                      @case(2) House @break
+                      @case(3) Lot @break
+                      @default Unknown
+                      @endswitch
+                    </td>
+                    <td>{{ $property->rentsale ? 'Rent' : 'Sale' }}</td>
+                    <td>{{ $property->size }}</td>
+                    <td>{{ $property->price }}</td>
+                    <td>{{ $property->street }}, {{ $property->city }}</td>
+                    <td>
+                      <a href="{{ route('property.edit', $property) }}" class="btn btn-success">Edit</a>
+                      <form method="POST" action="{{ route('property.destroy', $property) }}" style="display: inline-block;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                      </form>
+                    </td>
+                  </tr>
+                  @endforeach
+                </tbody>
+              </table>
             </div>
-            <div class="sub-circle">
-              <h4>{{ $numberOfApartmentsForSale }}</h4>
-              <p>For Sale</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- House -->
-        <div class="circle">
-          <h3>{{ $numberOfHouses }}</h3>
-          <p>Houses</p>
-          <div class="sub-circles">
-            <div class="sub-circle">
-              <h4>{{ $numberOfHousesForRent }}</h4>
-              <p>For Rent</p>
-            </div>
-            <div class="sub-circle">
-              <h4>{{ $numberOfHousesForSale }}</h4>
-              <p>For Sale</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Lots -->
-        <div class="circle">
-          <h3>{{ $numberOfLots }}</h3>
-          <p>Lots</p>
-          <div class="sub-circles">
-            <div class="sub-circle">
-              <h4>{{ $numberOfLotsForRent }}</h4>
-              <p>For Rent</p>
-            </div>
-            <div class="sub-circle">
-              <h4>{{ $numberOfLotsForSale }}</h4>
-              <p>For Sale</p>
-            </div>
+            @endif
           </div>
         </div>
       </div>
     </div>
-  </div>
   </div>
 </body>
 

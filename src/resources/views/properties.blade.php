@@ -42,7 +42,7 @@
           @auth
           <!-- Links for authenticated users -->
           <li class="nav-item">
-            <a class="nav-link" href="{{ url('/dashboard') }}">Dashboard</a>
+            <a class="nav-link" href="{{ route('profile.edit') }}">Edit Profile</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{{ route('logout') }}" onclick="event.preventDefault();
@@ -162,13 +162,14 @@
         <!-- Display the city and street of the property in one line -->
         <p>{{ $property->city }}, {{ $property->street }}</p>
 
-        @foreach ($property->images as $image)
+        @if($property->images->where('is_main', true)->first())
         <div class="image-wrapper">
-          <img src="{{ $image->imagepath }}" alt="Property Image">
+          <img src="{{ $property->images->where('is_main', true)->first()->imagepath }}" alt="Property Image">
         </div>
-        @endforeach
+        @endif
 
-        <a href="/properties/{{ $property->id }}" class="moreInfoButton">View More</a>
+        <a href="{{ route('properties.show', $property->id) }}" class="moreInfoButton">View More</a>
+
       </div>
       @endforeach
 

@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 use App\Services\PropertyService;
 use Illuminate\Http\Request;
 
-class PropertyController extends Controller
+class DefaultPageController extends Controller
 {
     private $propertyService;
 

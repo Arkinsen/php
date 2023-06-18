@@ -11,6 +11,32 @@ class Property extends Model
 
     protected $table = 'property';
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'user_id',
+        'description',
+        'longDescription',
+        'property_type',
+        'rentsale',
+        'size',
+        'price',
+        'street',
+        'city',
+        // add other fields here
+    ];
+
+    /**
+     * Get the user that owns the property.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function images()
     {
         return $this->hasMany(Image::class);
