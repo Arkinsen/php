@@ -9,6 +9,7 @@ use App\Http\Middleware\CheckUserRole;
 use App\Http\Controllers\PropertyDetailController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,8 +28,8 @@ Route::get('/', function () {
 
 Route::get('/', [DefaultPageController::class, 'getProperties']);
 
-Route::get('/contact', [ContactController::class, 'contact'])->name('contact');
-Route::post('/contact', [ContactController::class, 'send'])->name('contact.send');
+Route::get('/contact', [ContactController::class, 'contact'])->name('contact')->middleware('auth');
+Route::post('/contact', [ContactController::class, 'send'])->name('contact.send')->middleware('auth');
 
 
 Route::get('/properties/{property}', [PropertiesController::class, 'show'])->name('properties.show');
@@ -37,7 +38,7 @@ Route::get('/properties', [PropertiesController::class, 'index'])->name('propert
 
 
 
-//User interested in property function 
+//User interested in property function
 Route::post('/property/{property}/interested', [PropertyDetailController::class, 'markAsInteresting'])->name('property.interested');
 Route::post('/property/{id}/interested', [PropertyDetailController::class, 'addInterest'])->name('property.interested');
 Route::delete('/property/{id}/uninterest', [PropertyDetailController::class, 'removeInterest'])->name('property.uninterest');
@@ -69,10 +70,16 @@ Route::middleware('auth')->group(function () {
 });
 
 
+Route::get('auth/github', [AuthenticatedSessionController::class, 'redirectToGitHub'])->name('auth.github');
+Route::get('auth/github/callback', [AuthenticatedSessionController::class, 'handleGitHubCallback'])->name('auth.github.callback');
 
-// Route::get('/dashboard', function () {
-//     return view('dashboard');
-// })->middleware(['auth', 'verified'])->name('dashboard');
+
+
+
+
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
 
 require __DIR__ . '/auth.php';
