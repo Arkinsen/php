@@ -9,9 +9,11 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
-        //
+        Schema::table('property', function (Blueprint $table) {
+            $table->bigIncrements('id')->change();
+        });
     }
 
     /**

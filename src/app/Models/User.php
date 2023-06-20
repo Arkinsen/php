@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Interested;
 
 class User extends Authenticatable
 {
@@ -44,4 +46,25 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    /**
+     * connection between Users and interested
+     */
+    public function interests()
+    {
+        return $this->hasMany(Interested::class);
+    }
+
+    /**
+     * User is interestede in property
+     */
+    public function isInterestedIn($propertyId)
+    {
+        return $this->interests()->where('property_id', $propertyId)->exists();
+    }
+
+    public function lamo(){
+        $dsa = 'lama';
+        return $dsa;
+    }
 }

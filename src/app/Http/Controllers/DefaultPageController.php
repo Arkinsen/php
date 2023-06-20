@@ -25,9 +25,7 @@ class DefaultPageController extends Controller
         $numberOfHousesForRent = $this->propertyService->getNumberOfProperties(2, 1);
         $numberOfHousesForSale = $this->propertyService->getNumberOfProperties(2, 2);
         $numberOfLotsForRent = $this->propertyService->getNumberOfProperties(3, 1);
-        $numberOfLotsForSale = $this->propertyService->getNumberOfProperties(3, 2);
-        
-        
+        $numberOfLotsForSale = $this->propertyService->getNumberOfProperties(3, 2); 
         
         return view('welcome', compact(
             'numberOfProperties', 
@@ -41,5 +39,10 @@ class DefaultPageController extends Controller
             'numberOfLotsForRent', 
             'numberOfLotsForSale'
         ));
+    }
+
+    public function contact()
+    {
+        return view('contact');
     }
 }

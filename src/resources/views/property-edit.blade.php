@@ -1,90 +1,13 @@
 <!DOCTYPE html>
 <html>
-<!-- content -->
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-
-    <title>Reality Check</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    <!-- Our Custom CSS -->
-    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
-
-    <!-- Font Awesome JS -->
-    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js" integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ" crossorigin="anonymous"></script>
-    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js" integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY" crossorigin="anonymous"></script>
-</head>
-
+@include('partials.header')
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
-        <div class="container-fluid">
-            <!-- Reality Check Logo -->
-            <a class="navbar-brand" href="{{ url('/') }}">Reality Check</a>
-
-            <!-- Navbar toggler button for smaller screens -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse" id="navbarNavDropdown">
-                <ul class="navbar-nav ml-auto">
-                    <!-- Authentication Links -->
-                    @if (Route::has('login'))
-                    @auth
-                    <!-- Links for authenticated users -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('profile.edit') }}">Edit Profile</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('logout') }}" onclick="event.preventDefault();
-                               document.getElementById('logout-form').submit();">
-                            Logout
-                        </a>
-                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                            @csrf
-                        </form>
-                    </li>
-                    @else
-                    <!-- Links for guests -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('login') }}">Sign in</a>
-                    </li>
-                    @if (Route::has('register'))
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('register') }}">Sign up</a>
-                    </li>
-                    @endif
-                    @endauth
-                    @endif
-                </ul>
-            </div>
-        </div>
-    </nav>
+    @include('partials.navbar')
 
     <div class="wrapper">
-        <!-- Sidebar -->
-        <nav id="sidebar">
-            <div class="sidebar-header">
-                <h3>Reality Check</h3>
-            </div>
-
-            <ul class="list-unstyled components">
-                {{-- <p>Dummy Heading</p> --}}
-                <li>
-                    <a href="{{ url('/') }}">Home</a>
-                </li>
-                <li>
-                    <a href="{{ url('/properties') }}">View Properties</a>
-
-                </li>
-                <li>
-                    <a href="#">Contact</a>
-                </li>
-            </ul>
-        </nav>
+        @include('partials.sidebar')
 
         <!-- Page Content -->
         <div id="content">
@@ -168,7 +91,23 @@
                         @enderror
                     </div>
 
-                    <button type="submit" class="btn btn-primary" style="margin-bottom: 50px;">Update Property</button>
+                    <div class="form-group image-inputs">
+                        @foreach($property->images as $image)
+                        <div class="image-input">
+                            <label for="imagepath">Image URL:</label>
+                            <input type="text" name="imagepath[]" class="form-control" value="{{ old('imagepath.' . $loop->index, $image->imagepath) }}">
+                            <input type="radio" name="is_main" value="{{ $loop->index }}" {{ $image->is_main ? 'checked' : '' }}> Is main image?
+                            <button type="button" class="btn btn-danger delete-image" data-id="{{ $image->id }}">Remove</button>
+                        </div>
+                        @endforeach
+                    </div>
+                    <button type="button" id="add-image-input" class="btn btn-primary">Add More Image</button>
+
+                    <div style="margin: 50px;">
+                        <button type="submit" class="btn btn-primary">Update Property</button>
+                    </div>
+
+
                 </form>
             </div>
 
@@ -177,9 +116,48 @@
 </body>
 
 <footer>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var mainImageIndex = $('.image-input').length - 1;
+            var imageInputTemplate = $('.image-input').first().clone();
+            $('#add-image-input').click(function() {
+                var imageInput = imageInputTemplate.clone();
+                imageInput.find('input').val('');
+                imageInput.find('input[type=radio]').val(++mainImageIndex);
+                imageInput.appendTo('.image-inputs');
+            });
+
+            // Delegating the click event from a static parent to the .delete-image button.
+            $('.image-inputs').on('click', '.delete-image', function() {
+                var button = $(this);
+                var inputField = button.siblings('input[type=text]');
+                var id = button.data('id');
+
+                // If input field is empty, remove the field.
+                if (inputField.val() === '') {
+                    button.parent().remove();
+                } else {
+                    // If input field is not empty, send DELETE request as before.
+                    $.ajax({
+                        url: '/propertyEditor/image/' + id,
+                        method: 'DELETE',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function() {
+                            button.parent().remove();
+                        }
+                    });
+                }
+            });
+        });
+    </script>
 </footer>
+
+
 
 </html>

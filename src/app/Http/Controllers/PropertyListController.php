@@ -4,6 +4,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Property;
+use App\Models\Image;
 use Illuminate\Http\Request;
 
 class PropertyListController extends Controller
@@ -11,7 +12,7 @@ class PropertyListController extends Controller
     public function index()
     {
         $properties = Property::where('user_id', auth()->id())->get();
-        // dd($properties);  // Add this line for debugging
+        // dd($properties);
         return view('property-list', compact('properties'));
     }
 
@@ -27,17 +28,28 @@ class PropertyListController extends Controller
             'description' => 'required|max:40',
             'longDescription' => 'required|max:255',
             'property_type' => 'required|integer',
-            'rentsale' => 'required|numeric|min:1|max:2', //měl by být spíše boolean, ale uvědomil jsem si příliš pozdě
+            'rentsale' => 'required|numeric|min:1|max:2',
             'size' => 'required|integer|min:1',
             'price' => 'required|numeric|min:0',
             'street' => 'required|max:255',
             'city' => 'required|max:255',
+            'imagepath.*' => 'required|url',
         ]);
 
         // store data
         $property = new Property($request->all());
         $property->user_id = auth()->id();
         $property->save();
+
+
+
+        foreach ($request->imagepath as $index => $imagepath) {
+            $image = new Image();
+            $image->imagepath = $imagepath;
+            $image->property_id = $property->id;
+            $image->is_main = $request->is_main == $index ? 1 : 0;
+            $image->save();
+        }
 
         return redirect()->route('property.index');
     }
@@ -54,25 +66,54 @@ class PropertyListController extends Controller
             'description' => 'required|max:40',
             'longDescription' => 'required|max:255',
             'property_type' => 'required|integer',
-            'rentsale' => 'required|numeric|min:1|max:2', //měl by být spíše boolean, ale uvědomil jsem si příliš pozdě
+            'rentsale' => 'required|numeric|min:1|max:2',
             'size' => 'required|integer|min:1',
             'price' => 'required|numeric|min:0',
             'street' => 'required|max:255',
             'city' => 'required|max:255',
+            'imagepath.*' => 'nullable|url',
         ]);
 
         // update data
         $property->fill($request->all());
+        $property->user_id = auth()->id();
         $property->save();
+
+        foreach ($property->images as $index => $image) {
+            if (isset($request->imagepath[$index])) {
+                $image->imagepath = $request->imagepath[$index];
+                $image->is_main = $request->is_main == $index ? 1 : 0;
+                $image->save();
+            } else {
+                // Remove image if it's not present in the request
+                $image->delete();
+            }
+        }
+
+        // For new images
+        for ($i = count($property->images); $i < count($request->imagepath); $i++) {
+            $image = new Image();
+            $image->imagepath = $request->imagepath[$i];
+            $image->property_id = $property->id;
+            $image->is_main = $request->is_main == $i ? 1 : 0;
+            $image->save();
+        }
 
         return redirect()->route('property.index');
     }
 
-    // Delete images on Cascade so I don't need to care about it on a application level
+    // Delete images on Cascade so I don't need to care about it on an application level
     public function destroy(Property $property)
     {
         $property->delete();
 
         return redirect()->route('property.index');
+    }
+
+    public function deleteImage(Image $image)
+    {
+        $image->delete();
+
+        return response(null, 200);
     }
 }

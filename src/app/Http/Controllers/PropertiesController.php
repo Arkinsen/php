@@ -3,8 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Property;
+use App\Models\User;
+use App\Models\Interested;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
 
 class PropertiesController extends Controller
 {

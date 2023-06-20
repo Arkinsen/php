@@ -57,4 +57,17 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
+    public function interests()
+    {
+    // Get the currently authenticated user.
+    $user = auth()->user();
+
+    // Fetch all properties that this user is interested in.
+    $interests = $user->interests->map(function ($interest) {
+        return $interest->property;
+    });
+
+    return view('property-interested', ['interestedProperties' => $interests]);
+    }
 }
