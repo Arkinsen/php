@@ -23,7 +23,7 @@ class ContactMail extends Mailable
     public function build()
     {
         return $this->subject('Contact Message')
-            ->from(Auth::user()->email)
+            ->from(env('MAIL_FROM_ADDRESS'))
             ->view('emails.contactmail')
             ->with('details', $this->details);
     }

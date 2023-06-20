@@ -9,10 +9,15 @@
 
     <div class="wrapper">
         @include('partials.sidebar')
-       
+
         <div id="content">
             <div class="container">
                 <h1>Contact Us</h1>
+
+                <h3>Are Owners, contact us!:</h3>
+                @foreach($users as $user)
+                <p>{{ $user->email }}</p>
+                @endforeach
 
                 <form action="{{ route('contact.send') }}" method="post">
                     @csrf
